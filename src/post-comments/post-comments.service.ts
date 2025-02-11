@@ -46,7 +46,7 @@ export class PostCommentsService {
       const commentsWithUserInfo = await Promise.all(
         commentsResult.map(async (comment) => {
           const [user] = await db
-            .select({ username: usersTable.firstname, lastname: usersTable.lastname, profilepicture: usersTable.profilepicture })
+            .select({ username: usersTable.firstname, lastname: usersTable.lastname, profilepicture: usersTable.photoUrl })
             .from(usersTable)
             .where(eq(usersTable.userid, comment.user_id)) // Join with usersTable to get the user's info
             .execute();
@@ -146,7 +146,7 @@ async deleteComment(commentId: selectComments['comment_id']): Promise<void> {
           user_id: comments.user_id,
           firstname: usersTable.firstname,
           lastname: usersTable.lastname,
-          profilepicture: usersTable.profilepicture,
+          profilepicture: usersTable.photoUrl,
         })
         .from(comments)
         .leftJoin(usersTable, eq(comments.user_id, usersTable.userid)) // Left join to get user info

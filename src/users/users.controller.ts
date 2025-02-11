@@ -11,7 +11,9 @@ import {
   HttpStatus,
   Put,
   Req,
-  Query
+  Query,
+  UseInterceptors,
+  UploadedFile
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { selectUsers, usersTable } from 'src/db/schema';
@@ -23,6 +25,7 @@ import { lastNameDto } from './dto/updateLastName.dto';
 import { profilePictureNameDto } from './dto/updateProfilePicture.dto';
 import { JwtAuthGuard } from 'src/inventory/guard';
 import { CreateUserDtoTwo } from './dto/createUserDtotwo.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 // Controller to manage both OTP and user-related operations
 @Controller('users')
@@ -76,22 +79,84 @@ export class UsersController {
       
     }
   
+    @Post('create-user')
+    @UseInterceptors(FileInterceptor('file'))
+    async createUser(
+      @Body() createUserDtotwo: CreateUserDtoTwo,  // Use @Body() to bind the data sent in the request body
+      @UploadedFile() file: Express.Multer.File,    // File will be attached here
+    ): Promise<selectUsers> {
+      // Check if file is uploaded
+      if (!file) {
+        console.log('No file uploaded');
+        throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
+      }
   
-  // Endpoint to create a new user (Registration)
-  @Post('create-user')
-  async createUser(
-    @Body() createUserDtotwo: CreateUserDtoTwo
-  ): Promise<selectUsers> {
-    const { firstname, lastname, profilepicture, email, password,sex,dateofbirth,phonenumber } = createUserDtotwo;
-
-
-    // Pass user data to the service to create the user
-    const result = await this.usersService.createUser(firstname, lastname, profilepicture, email, password,sex,dateofbirth,phonenumber);
-
-    // Return created user with the result
-    return result;
-  }
-
+      try {
+        // Log the uploaded file for debugging
+        //console.log('File uploaded:', file.originalname);
+        //console.log('File size:', file.size);
+        //console.log('File buffer length:', file.buffer.length);
+        
+        // Upload file to Cloudinary
+        //console.log('Uploading file to Cloudinary...');
+        const result = await this.usersService.uploadImage(file.buffer, file.originalname, 90);
+        
+        // Log Cloudinary upload result
+        //console.log('Cloudinary upload result:', result);
+        
+        const { public_id: publicId, secure_url: photoUrl } = result;
+  
+        // Log the URL and public ID received from Cloudinary
+        //console.log('Received photo URL:', photoUrl);
+        //console.log('Received public ID:', publicId);
+  
+        // Combine uploaded file info with user data
+        const newUser = {
+          ...createUserDtotwo,
+          photo_url: photoUrl,        // URL for rendering the image
+          photo_public_id: publicId,  // Unique ID for the image (to delete it later)
+        };
+  
+        // Destructure properties for creating the user
+        const { firstname, lastname, email, password, sex, dateofbirth, phonenumber } = createUserDtotwo;
+  
+        // Log the user data before creating the user
+        console.log('User data to be inserted:', {
+          firstname,
+          lastname,
+          email,
+          password,
+          sex,
+          dateofbirth,
+          phonenumber,
+          photoUrl,
+          publicId,
+        });
+  
+        // Call service to create user
+        const user = await this.usersService.createUser(
+          firstname,
+          lastname,
+          email,
+          password,
+          sex,
+          dateofbirth,
+          phonenumber,
+          photoUrl,
+          publicId
+        );
+  
+        // Log the created user
+        console.log('Created user:', user);
+  
+        return user;
+  
+      } catch (error) {
+        console.error('Error creating user:', error);
+        throw new HttpException('Failed to create user', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+    
   // Endpoint to authenticate a user (Login)
   @Post('logi-n')
   async login(@Body() LoginDto: { email: string; password: string }) {
@@ -155,7 +220,7 @@ export class UsersController {
     }
   }
 
-  @Put('updateprofilepicture')
+  /*@Put('updateprofilepicture')
   async updateProfilepicture(@Body() updateFirstNameDto: profilePictureNameDto) {
     try {
       const { email, profilePicture } = updateFirstNameDto;
@@ -167,5 +232,5 @@ export class UsersController {
       // Handle errors
       throw new Error('Failed to update profile. Please try again later.');
     }
-  }
+  }*/
 }

@@ -4,6 +4,7 @@ import { db } from 'src/db';
 import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
 
 @Injectable()
 export class UsersService {
@@ -59,28 +60,33 @@ async  getUserByEmail(email: string): Promise<selectUsers | null> {
   async createUser(
     firstname: string,
     lastname: string,
-    profilepicture: string,
     email: string,
     password: string,
     sex:string,
     dateofbirth:any,
     phonenumber:string,
+    photoUrl:string,publicId:string
+
   ): Promise<any> {
     try {
       // Hash the password
+      
       const hashedPassword = await bcrypt.hash(password, 12);
+
+      
+      console.log(hashedPassword);
   
       // User data to be inserted into the database
       const data = {
         firstname,
         lastname,
-        profilepicture,
         email,
         password: hashedPassword,
         sex,
         dateofbirth,
         phonenumber,
         activationstatus: true, // Set default value for activationstatus (true or false)
+        photoUrl,publicId
       };
   
       // Insert user into the database and get the inserted user back
@@ -106,7 +112,6 @@ async  getUserByEmail(email: string): Promise<selectUsers | null> {
           firstname: user.firstname,
           lastname: user.lastname,
           email: user.email,
-          profilepicture: user.profilepicture,
           activationstatus:user.activationstatus,
         },
         //access_token: token, // Include the JWT token in the response
@@ -249,7 +254,7 @@ async updateLastName(email: string, lastname: string) {
   }
 }
 
-async updateProfilePicture(email: string, profilepicture: string) {
+/*async updateProfilePicture(email: string, profilepicture: string) {
   try {
     // Check if the email and name are valid (optional validation)
 
@@ -277,5 +282,32 @@ async updateProfilePicture(email: string, profilepicture: string) {
     console.error('Error updating :', error);
     throw new Error('Failed to update . Please try again later.');
   }
-}
+}*/
+
+ async  uploadImage(fileBuffer: Buffer, fileName: string, quality: number): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = v2.uploader.upload_stream(
+        {
+          resource_type: 'auto',  // Automatically detect file type
+          public_id: fileName,    // Use fileName as public_id
+          folder: '',    // Optionally specify a folder
+          transformation: [
+            { width: 800, height: 600, crop: 'limit' },  // Resize to fit within 800x600
+            { quality: quality },  // Specify custom quality (e.g., 80)
+          ],
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Cloudinary upload error:', error);
+            return reject(error);
+          }
+          if(result){
+            resolve(result)
+          }
+        }
+      );
+  
+      uploadStream.end(fileBuffer); // End the stream with the buffer
+    });
+  }
 }

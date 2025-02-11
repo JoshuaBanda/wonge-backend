@@ -55,13 +55,14 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"userid" serial PRIMARY KEY NOT NULL,
 	"firstname" text NOT NULL,
 	"lastname" text NOT NULL,
-	"profilepicture" text NOT NULL,
 	"email" text,
 	"password" text NOT NULL,
 	"activationstatus" boolean NOT NULL,
 	"sex" text NOT NULL,
 	"dateofbirth" date NOT NULL,
 	"phonenumber" text NOT NULL,
+	"photourl" text NOT NULL,
+	"publicId" text NOT NULL,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint

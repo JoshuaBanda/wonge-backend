@@ -7,8 +7,6 @@ export class CreateUserDtoTwo {
   @IsString()
   lastname: string;
 
-  @IsString()
-  profilepicture: string;
 
   @IsString()
   email: string;

@@ -95,7 +95,7 @@ export class InventoryService {
           .select({
             firstname: usersTable.firstname,
             lastname: usersTable.lastname,
-            profilepicture: usersTable.profilepicture,
+            profilepicture: usersTable.photoUrl,
           })
           .from(usersTable)
           .where(eq(usersTable.userid, inventory.user_id))
@@ -268,7 +268,7 @@ export class InventoryService {
         .select({
           firstname: usersTable.firstname,
           lastname: usersTable.lastname,
-          profilepicture: usersTable.profilepicture,
+          profilepicture: usersTable.photoUrl,
         })
         .from(usersTable)
         .where(eq(usersTable.userid, userIdFromInventory))
@@ -353,7 +353,7 @@ export class InventoryService {
       // Perform the update operation
       const result = await db
         .update(usersTable)
-        .set({ profilepicture: profilepicture })
+        .set({ photoUrl: profilepicture })
         .where(eq(usersTable.email, email));
 
       if (result.count === 0) {

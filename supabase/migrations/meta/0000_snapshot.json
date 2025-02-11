@@ -1,5 +1,5 @@
 {
-  "id": "1fbf0d8e-505f-4ca4-a2a7-08cd04cd518a",
+  "id": "14738fd5-fc55-41fd-90db-a00e048080ce",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -443,12 +443,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "profilepicture": {
-          "name": "profilepicture",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "email": {
           "name": "email",
           "type": "text",
@@ -481,6 +475,18 @@
         },
         "phonenumber": {
           "name": "phonenumber",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "photourl": {
+          "name": "photourl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "publicId": {
+          "name": "publicId",
           "type": "text",
           "primaryKey": false,
           "notNull": true

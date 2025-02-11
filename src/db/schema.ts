@@ -67,13 +67,14 @@ export const usersTable = pgTable('users', {
     userid: serial('userid').primaryKey(),
     firstname: text('firstname').notNull(),
     lastname: text('lastname').notNull(),
-    profilepicture: text('profilepicture').notNull(),
     email: text('email').unique(),
     password: text('password').notNull(),
     activationstatus: boolean('activationstatus').notNull(),
     sex:text("sex").notNull(),
     dateofbirth:date("dateofbirth").notNull(),
     phonenumber:text("phonenumber").notNull(),
+    photoUrl:text('photourl').notNull(),
+    publicId:text('publicId').notNull(),
   },
   
   (table) => ({
