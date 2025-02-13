@@ -6,9 +6,11 @@ import { NotificationModule } from './notification/notification.module';
 import { UsersModule } from './users/users.module';
 import { OtpModule } from './otp/otp.module';
 import { EmailModule } from './email/email.module';
+import { SearchModule } from './search/search.module';
+import { UserAunthenticateModule } from './user-aunthenticate/user-aunthenticate.module';
 
 @Module({
-  imports: [InventoryModule, NotificationModule, UsersModule, OtpModule, EmailModule],
+  imports: [InventoryModule, NotificationModule, UsersModule, OtpModule, EmailModule, SearchModule, UserAunthenticateModule],
   controllers: [AppController],
   providers: [AppService],
 })

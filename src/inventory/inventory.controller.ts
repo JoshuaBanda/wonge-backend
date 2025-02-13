@@ -10,17 +10,17 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService,
   ) {}
 
-  @UseGuards(JwtAuthGuard) // Apply the guard to protect this route
+  //@UseGuards(JwtAuthGuard) // Apply the guard to protect this route
   @Get()
   async getAllnventories(@Req() req): Promise<selectInventory[]> {
 
     // The userId is now available in req.user after the guard verifies the JWT token
-    const userId = req.user?.sub; // Access userId (stored in 'sub' in the token)
-    if (!userId) {
-      throw new Error('User ID is required to fetch inventory');
-    }
+    //const userId = req.user?.sub; // Access userId (stored in 'sub' in the token)
+    //if (!userId) {
+      //throw new Error('User ID is required to fetch inventory');
+    //}
 
-    const inventories = await this.inventoryService.getInventories(userId);
+    const inventories = await this.inventoryService.getInventories(1);
     if (!inventories) {
       return []; // Return empty array if no inventories are found
     }
@@ -65,6 +65,7 @@ export class InventoryController {
       };
   
       // Insert the post into the database
+      console.log('new post',newPost);
       const createdPost = await this.inventoryService.createInventories(newPost);
   
       return {

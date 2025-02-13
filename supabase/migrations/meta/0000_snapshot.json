@@ -1,5 +1,5 @@
 {
-  "id": "14738fd5-fc55-41fd-90db-a00e048080ce",
+  "id": "d0304f02-97ab-4d98-b750-a28d3f6f0e26",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -186,6 +186,12 @@
           "primaryKey": true,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "description": {
           "name": "description",
           "type": "text",
@@ -216,6 +222,24 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "price": {
+          "name": "price",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "whatsappmessage": {
+          "name": "whatsappmessage",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},

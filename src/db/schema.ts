@@ -90,6 +90,7 @@ export type selectUsers=typeof usersTable.$inferSelect;
 
 export const inventory=pgTable('inventory',{
   id:serial('id').primaryKey(),
+  name:text('name').notNull(),
   description:text('description').notNull(),
   photo_url:text('photo_url').notNull(),
   photo_public_id:text('photo_publlic_id').notNull(),
@@ -97,6 +98,9 @@ export const inventory=pgTable('inventory',{
   .notNull()
   .references(() => usersTable.userid, { onDelete: 'cascade' }),
   created_at: timestamp('createdat').defaultNow(),
+  type:text("type").notNull(),
+  price:text("price").notNull(),
+  whatsappmessage:text('whatsappmessage').notNull(),
 });
 export type selectInventory=typeof inventory.$inferSelect;
 export type insertInventory=typeof inventory.$inferInsert;

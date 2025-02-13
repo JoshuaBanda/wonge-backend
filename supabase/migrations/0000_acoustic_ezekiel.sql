@@ -21,11 +21,15 @@ CREATE TABLE IF NOT EXISTS "inbox" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "inventory" (
 	"id" serial PRIMARY KEY NOT NULL,
+	"name" text NOT NULL,
 	"description" text NOT NULL,
 	"photo_url" text NOT NULL,
 	"photo_publlic_id" text NOT NULL,
 	"user_id" integer NOT NULL,
-	"createdat" timestamp DEFAULT now()
+	"createdat" timestamp DEFAULT now(),
+	"type" text NOT NULL,
+	"price" text NOT NULL,
+	"whatsappmessage" text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "likes" (

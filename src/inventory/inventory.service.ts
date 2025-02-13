@@ -218,8 +218,8 @@ export class InventoryService {
           created_at,
         });*/
 
-        const friendsToRecieveNotifications=await this.getFriends(user_id);
-        console.log('friendsToRecieveNotifications',friendsToRecieveNotifications);
+        //const friendsToRecieveNotifications=await this.getFriends(user_id);
+        //console.log('friendsToRecieveNotifications',friendsToRecieveNotifications);
 // reminder, come back to this 
         //await this.notificationService.createNotificationsForFriends(friendsToRecieveNotifications);
 
