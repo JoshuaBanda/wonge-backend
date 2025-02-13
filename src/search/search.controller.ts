@@ -12,8 +12,8 @@ export class SearchController {
     }
 
     try {
-      const users = await this.searchService.searchUser(name);
-      return {users};
+      const products = await this.searchService.searchUser(name);
+      return {products};
     } catch (error) {
       throw new Error('Error occurred while searching for users');
     }
