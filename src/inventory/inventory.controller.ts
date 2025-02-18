@@ -56,6 +56,8 @@ export class InventoryController {
       // Upload file to Cloudinary
       const result = await this.inventoryService.uploadImage(file.buffer, file.originalname, 90);
       const { public_id: publicId, secure_url: photoUrl } = result;
+
+      console.log(result);
   
       // Add the photo URL and publicId to the post DTO
       const newPost = {

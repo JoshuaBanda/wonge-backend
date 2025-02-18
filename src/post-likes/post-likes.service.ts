@@ -47,7 +47,7 @@ export class LikesService {
         .from(likes)
         .where(eq(likes.inventory_id, postId)) // Filter likes by post_id
         .execute();
-
+        console.log('hi');
       return likesForPost.length > 0 ? likesForPost : null;
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch likes for the post');
