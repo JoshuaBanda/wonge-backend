@@ -144,3 +144,13 @@ export const notification=pgTable('notificatios',{
 });
 export type selectNotification=typeof notification.$inferSelect;
 export type insertNotification=typeof notification.$inferInsert;
+
+export const  cart=pgTable('cart',{
+    id:serial('id').primaryKey(),
+    inventory_id:integer('inventory_id').notNull().references(()=>inventory.id,{onDelete:'cascade'}),
+    user_id:integer('user_id').notNull().references(()=>usersTable.userid,{onDelete:'cascade'}),
+    created_at:timestamp('created_at').defaultNow(),
+});
+
+export type selectCart=typeof cart.$inferSelect;
+export type insertCArt=typeof cart.$inferInsert;

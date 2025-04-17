@@ -41,13 +41,17 @@ export class LikesService {
 
   // Get all likes for a post
   async getLikesForPost(postId: number): Promise<selectLikes[] | null> {
+    console.log(postId);
     try {
       const likesForPost = await db
         .select()
         .from(likes)
         .where(eq(likes.inventory_id, postId)) // Filter likes by post_id
         .execute();
-        console.log('hi');
+        if(likesForPost.length<1){
+          console.log('null');
+        }
+        
       return likesForPost.length > 0 ? likesForPost : null;
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch likes for the post');
