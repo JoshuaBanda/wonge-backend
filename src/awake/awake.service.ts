@@ -12,7 +12,7 @@ export class AwakeService {
   @Interval(60000) // every 2 minutes (in milliseconds)
   async callAnotherBackend() {
     try {
-      const response$ = this.httpService.get('https://wonge-backend.onrender.com/awake');
+      const response$ = this.httpService.get('https://datehubbackend.onrender.com/awake');
       const response = await lastValueFrom(response$);
       this.logger.log('Data received:', response.data);
       console.log('request sent');
