@@ -175,7 +175,6 @@ export class UsersController {
       throw new BadRequestException('Account not activated, change your password to activate account')
     }
    }
-    const damdata={result,user}
     return {result,user};
   }
 
