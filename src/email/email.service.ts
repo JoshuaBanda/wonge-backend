@@ -28,7 +28,7 @@ export class EmailService {
     const mailOptions = {
       from: process.env.SMTP_USER, // Your email address
       to: email,
-      subject: 'Your OTP for Email Verification, Unima Dating',
+      subject: 'Wonge Market Online OTP Email Verification',
       text: `Your OTP is: ${otp}. This OTP is valid for 10 minutes. `,
     };
 
