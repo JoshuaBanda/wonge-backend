@@ -29,6 +29,64 @@ export class InventoryService {
     
   }
  
+  async getInventoryByType(
+    
+    productType:string,
+    userId: number=1,
+    page: number,
+    limit: number
+  ): Promise<(selectInventory & { username: string; lastname: string; profilepicture: string })[] | null> {
+    try {
+      const offset = (page - 1) * limit;
+  
+      const cachedInventoryItems = this.userCaches.get(userId) || [];
+      
+      // Filter out items that have already been sent
+      const unsentCachedInventoryItems = cachedInventoryItems.filter(
+        (inventoryItem) => !this.inventoryItemTracker.getSentInventoryItemIds(userId).includes(inventoryItem.id)
+      );
+  
+      // If unsent inventoryItems are available in the cache, return them
+      if (unsentCachedInventoryItems.length > 0) {
+        //console.log(`Returning ${unsentCachedinventoryItems.length} cached inventoryItemss for user ${userId}`);
+        const paginatedInventoryItems = unsentCachedInventoryItems.slice(offset, offset + limit);
+        this.inventoryItemTracker.markInventoryItemsAsSent(userId, paginatedInventoryItems); // Mark inventoryItems as sent
+        return paginatedInventoryItems;
+      }
+  
+      // If no unsent inventoryItems are found, fetch new inventoryItems from the database
+      //console.log(`No unsent cached inventoryItems for user ${userId}`);
+      
+      const results = await db
+        .select()
+        .from(inventory)
+        .where(not(inArray(inventory.id, this.inventoryItemTracker.getSentInventoryItemIds(userId)))) // Filter out already sent inventoryItems
+        .limit(limit)
+        .offset(offset)
+        .execute();
+  
+      if (results.length === 0) {
+        //console.log(`No new inventoryItems available for user ${userId}. Clearing tracker.`);
+        this.inventoryItemTracker.clearSentInventoryItems(userId); // Clear the tracker if no new inventoryItems are found
+        return null; // Return null when no new inventoryItems are available
+      }
+  
+      // Append new inventoryItems to the cache and mark them as sent
+      const inventoryItemsWithUserDetails = await this.fetchInventoryItemsWithUserDetails(results);
+      //console.log(`Updating cache and tracker for user ${userId}`);
+      
+      // Append the new inventoryItems to the existing cache (avoiding overwriting)
+      const updatedCache = [...cachedInventoryItems, ...inventoryItemsWithUserDetails];
+      this.userCaches.set(userId, updatedCache);
+      this.inventoryItemTracker.markInventoryItemsAsSent(userId, results);
+  
+      return inventoryItemsWithUserDetails;
+    } catch (error) {
+      console.error(`Error fetching inventoryItems for user ${userId}:`, error);
+      throw new InternalServerErrorException('Failed to retrieve inventoryItems');
+    }
+  }
+  
 
   async getInventories(
     userId: number,

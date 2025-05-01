@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { insertInventory, selectInventory } from "src/db/schema";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -33,11 +33,23 @@ export class InventoryController {
     const shuffled = posts.sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   }
+  @Get("products/:productType/:page/:limit")
+  async getInventoriesByType(
+    @Param('productType') productType: string,
+    @Param('page') page: number,
+    @Param('limit') limit: number
+  ): Promise<selectInventory[]> {
+    console.log(productType,page,limit);
+    const userId=1;
+    const inventories = await this.inventoryService.getInventoryByType(productType,userId,page,limit);
+    if (!inventories) {
+      return []; // Return empty array if no inventories are found
+    }
 
-
-
-
-
+    // Use the limit from query
+    const randomInventories = this.getRandomInventories(inventories, limit);
+    return randomInventories;
+  }
 
 
 
