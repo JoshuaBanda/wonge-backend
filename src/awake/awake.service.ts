@@ -9,7 +9,7 @@ export class AwakeService {
 
   constructor(private readonly httpService: HttpService) {}
 
-  @Interval(600000) 
+  @Interval(300000) 
   async callAnotherBackend() {
     try {
       const response$ = this.httpService.get('https://datehubbackend.onrender.com/awake');
