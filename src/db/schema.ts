@@ -150,6 +150,9 @@ export const  cart=pgTable('cart',{
     inventory_id:integer('inventory_id').notNull().references(()=>inventory.id,{onDelete:'cascade'}),
     user_id:integer('user_id').notNull().references(()=>usersTable.userid,{onDelete:'cascade'}),
     created_at:timestamp('created_at').defaultNow(),
+    quantity:integer('quantity').notNull(),
+    //status of the items at a point in time
+    status:text("status").notNull(),//active, removed ,outofStock,reservation expired
 });
 
 export type selectCart=typeof cart.$inferSelect;
