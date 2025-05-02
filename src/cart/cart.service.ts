@@ -52,7 +52,15 @@ export class CartService {
   async getCartItems(user_id:number){
     try{
       
-    const res=await db.select().from(cart).where(eq(cart.user_id,user_id));
+    const res=await db
+      .select()
+      .from(cart)
+      .where(
+        and(
+          eq(cart.user_id,user_id),
+          eq(cart.status,'active')
+        )
+      );
     //console.log("res", res);
     if(res==null){
       return
