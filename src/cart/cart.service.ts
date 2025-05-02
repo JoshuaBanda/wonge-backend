@@ -2,8 +2,8 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { db } from 'src/db';
-import { cart } from 'src/db/schema';
-import { eq, sql } from 'drizzle-orm';
+import { cart, inventory } from 'src/db/schema';
+import { eq, inArray, sql } from 'drizzle-orm';
 
 @Injectable()
 export class CartService {
@@ -20,7 +20,7 @@ export class CartService {
       .values(data)
       .returning();
   
-    console.log(newCart);
+    //console.log(newCart);
     return newCart;
   }
   
@@ -51,8 +51,18 @@ export class CartService {
     if(res==null){
       return
     }//console.log(res)
+
+    const inventoryIds = res.map(item => item.inventory_id);
+    //console.log(inventoryIds);
+
+    const inventories = await db
+    .select()
+    .from(inventory)
+    .where(inArray(inventory.id, inventoryIds));
+
     
-    return res;
+    
+    return inventories;
 
     }catch(error){
       throw new InternalServerErrorException("error getting cart items")
