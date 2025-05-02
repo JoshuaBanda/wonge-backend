@@ -1,14 +1,15 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { db } from 'src/db';
-import { cart, inventory } from 'src/db/schema';
-import { eq, inArray, sql } from 'drizzle-orm';
+import { cart, inventory, selectCart } from 'src/db/schema';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 @Injectable()
 export class CartService {
 
   async addToCart(data:any) {
+    console.log("status",data.status);
     const exists = await this.checkCart(data.user_id, data.inventory_id);
     // console.log("is exist",exists);
     if (exists) {
@@ -25,23 +26,28 @@ export class CartService {
   }
   
   async checkCart(user_id: number, inventory_id: number): Promise<boolean> {
-    const existingItem = await db
+    // Check if there's any active item with the same user_id and inventory_id
+    const activeItems = await db
       .select()
       .from(cart)
       .where(
-        sql`${cart.user_id} = ${user_id} AND ${cart.inventory_id} = ${inventory_id}`
+        and(
+          eq(cart.user_id, user_id),
+          eq(cart.inventory_id, inventory_id),
+          eq(cart.status, 'active')
+        )
       );
-  
-    if (existingItem.length > 0) {
-      //console.log("existing items", existingItem);
+
+    // If any active items exist, return true (duplicate found)
+    if (activeItems.length > 0) {
+      console.log('Duplicate active item found:', activeItems);
       return true;
-    } else {
-      console.log("no items");
-      return false;
     }
-  
-    return existingItem.length > 0;
-  }
+
+    // No active duplicates found
+    console.log('No duplicate active items found');
+    return false;
+}
   
   async getCartItems(user_id:number){
     try{
@@ -68,14 +74,36 @@ export class CartService {
         inventory: inventoryItem // attach full inventory object
       };
     });
-    
-    //console.log(combined);
-    
-    
     return combined;
-
     }catch(error){
       throw new InternalServerErrorException("error getting cart items")
+    }
+  }
+  
+
+  async makeOrder(user_id: number, inventoryIds: number[],newStatus:string): Promise<selectCart[] | null> {
+    try {
+      console.log("new status",newStatus);
+      const result = await db
+        .update(cart)
+        .set({ status:newStatus })
+        .where(
+          inArray(cart.inventory_id, inventoryIds)
+        )
+        .returning();
+        console.log(result);
+
+
+      if (result.length === 0) {
+        throw new NotFoundException(`No carts found for inventory IDs: ${inventoryIds.join(', ')}`);
+      }
+
+      
+  
+      return result;
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      throw error;
     }
   }
   

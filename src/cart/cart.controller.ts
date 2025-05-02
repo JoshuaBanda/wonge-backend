@@ -34,10 +34,15 @@ export class CartController {
     return this.cartService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartService.update(+id, updateCartDto);
+  @Patch('order')
+  update(@Body() updateCartDto: UpdateCartDto) {
+    console.log("body", updateCartDto);
+  
+    const { user_id, status, inventory_ids } = updateCartDto;
+  
+    return this.cartService.makeOrder(user_id, inventory_ids,status);
   }
+  
 
   @Delete(':id')
   remove(@Param('id') id: string) {
