@@ -60,9 +60,19 @@ export class CartService {
     .from(inventory)
     .where(inArray(inventory.id, inventoryIds));
 
+    //mix res and inventories
+    const combined = res.map(cartItem => {
+      const inventoryItem = inventories.find(inv => inv.id === cartItem.inventory_id);
+      return {
+        ...cartItem,
+        inventory: inventoryItem // attach full inventory object
+      };
+    });
+    
+    //console.log(combined);
     
     
-    return inventories;
+    return combined;
 
     }catch(error){
       throw new InternalServerErrorException("error getting cart items")
