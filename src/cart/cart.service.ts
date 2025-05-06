@@ -49,7 +49,7 @@ export class CartService {
     return false;
 }
   
-  async getCartItems(user_id:number){
+  async getActiveCartItems(user_id:number){
     try{
       
     const res=await db
@@ -64,7 +64,46 @@ export class CartService {
     //console.log("res", res);  
     if(res==null){
       return
-    }//console.log(res)
+    }
+
+    const inventoryIds = res.map(item => item.inventory_id);
+    //console.log(inventoryIds);
+
+    const inventories = await db
+    .select()
+    .from(inventory)
+    .where(inArray(inventory.id, inventoryIds));
+
+    //mix res and inventories
+    const combined = res.map(cartItem => {
+      const inventoryItem = inventories.find(inv => inv.id === cartItem.inventory_id);
+      return {
+        ...cartItem,
+        inventory: inventoryItem // attach full inventory object
+      };
+    });
+    return combined;
+    }catch(error){
+      throw new InternalServerErrorException("error getting cart items")
+    }
+  }
+  
+  async getHistoryCartItems(user_id:number){
+    try{
+      
+    const res=await db
+      .select()
+      .from(cart)
+      .where(
+        and(
+          eq(cart.user_id,user_id),
+          eq(cart.status,'ordered')
+        )
+      );
+    //console.log("res", res);  
+    if(res==null){
+      return
+    }
 
     const inventoryIds = res.map(item => item.inventory_id);
     //console.log(inventoryIds);

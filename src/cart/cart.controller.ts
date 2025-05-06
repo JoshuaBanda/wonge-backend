@@ -20,9 +20,27 @@ export class CartController {
   getCartItems(
     @Param('user_id') user_id:number
   ) {
-    return this.cartService.getCartItems(user_id);
+    try{
+      
+    return this.cartService.getActiveCartItems(user_id);
+    }catch(error){
+      console.log(error);
+    }
   }
 
+
+  
+  @Get("get-cart-items/:user_id/history")
+  geHistorytCartItems(
+    @Param('user_id') user_id:number
+  ) {
+    try{
+      
+    return this.cartService.getHistoryCartItems(user_id);
+    }catch(error){
+      console.log(error);
+    }
+  }
   @Get('check-is-cart/:user_id/:inventory_id')
   checkIsCartAdded(
     @Param('user_id') user_id:number,
