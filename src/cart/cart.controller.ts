@@ -3,6 +3,7 @@ import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
 import { UpdateQuantityCartDto } from './dto/update-quantity-cart.dto';
+import { UpdateSingleItem } from './dto/updateSingleItem.dto';
 
 @Controller('cart')
 export class CartController {
@@ -56,6 +57,15 @@ export class CartController {
     const { user_id, status, inventory_ids } = updateCartDto;
   
     return this.cartService.makeOrder(user_id, inventory_ids,status);
+  }
+
+  @Patch('order-one-item')
+  updateItem(@Body() updateSingleItem:UpdateSingleItem) {
+    console.log("body", updateSingleItem);
+  
+    const { user_id, status, cart_id } = updateSingleItem;
+  
+    return this.cartService.makeItemOrder(user_id, cart_id,status);
   }
   
 

@@ -153,6 +153,31 @@ export class CartService {
       throw error;
     }
   }
+  async makeItemOrder(user_id: number, cartId: number, newStatus: string): Promise<selectCart[] | null> {
+    try {
+      console.log("new status", newStatus,"user_id",user_id,"cartId",cartId);
+      
+      const result = await db
+        .update(cart)
+        .set({ status: newStatus })
+        .where(
+          and(eq(cart.id, cartId), eq(cart.user_id, user_id)) // more secure
+        )
+        .returning();
+      
+      console.log("Updated cart:", result);
+  
+      if (result.length === 0) {
+        throw new NotFoundException(`No cart found for user ID ${user_id} and cart ID ${cartId}`);
+      }
+  
+      return result;
+    } catch (error) {
+      console.error('Error updating cart:', error);
+      throw error;
+    }
+  }
+  
   
   async UpdateQuantity(newQuantity: number, inventory_id: number, cartId: number) {
     try {
