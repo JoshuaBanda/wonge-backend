@@ -101,6 +101,7 @@ export const inventory=pgTable('inventory',{
   type:text("type").notNull(),
   price:text("price").notNull(),
   whatsappmessage:text('whatsappmessage').notNull(),
+  quantity:integer('quantity').notNull(),
 });
 export type selectInventory=typeof inventory.$inferSelect;
 export type insertInventory=typeof inventory.$inferInsert;

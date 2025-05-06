@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, InternalServerErrorException, NotFoundException, Param, Patch, Post, Query, Req, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { insertInventory, selectInventory } from "src/db/schema";
 import { FileInterceptor } from "@nestjs/platform-express";
@@ -10,24 +10,42 @@ export class InventoryController {
   constructor(private readonly inventoryService: InventoryService,
   ) {}
 
+  //@UseGuards(JwtAuthGuard) // Apply the guard to protect this route@Get()
+  
   //@UseGuards(JwtAuthGuard) // Apply the guard to protect this route
   @Get()
-  async getAllnventories(@Req() req): Promise<selectInventory[]> {
+async getAllInventories(/*@Req() req*/): Promise<selectInventory[]> {
 
-    // The userId is now available in req.user after the guard verifies the JWT token
-    //const userId = req.user?.sub; // Access userId (stored in 'sub' in the token)
+  try {
+    //let userId = req.user?.sub; // Access userId (stored in 'sub' in the token)
+    //console.log("aunthenticated user id",userId);
     //if (!userId) {
-      //throw new Error('User ID is required to fetch inventory');
+     // console.log("no user");
+      //throw new UnauthorizedException('User ID is required to fetch inventory');
     //}
+    let userId=1;
+      // 2. Get inventories with proper error handling
+      let inventories = await this.inventoryService.getInventories(userId);
+      
+      // 3. If first attempt fails, try once more
+      if (!inventories) {
+          inventories = await this.inventoryService.getInventories(userId);
+      }
 
-    const inventories = await this.inventoryService.getInventories(1);
-    if (!inventories) {
-      return []; // Return empty array if no inventories are found
-    }
+      // 4. If still no inventories, return empty array
+      if (!inventories) {
+          return []; 
+      }
+      //console.log(inventories);
 
-    const randomInventories = this.getRandomInventories(inventories, 10);  //fetch post
-    return randomInventories;
+      // 5. Return random selection
+      console.log("returning",inventories);
+      return this.getRandomInventories(inventories, 10);
+  } catch (error) {
+      // Handle unexpected errors
+      throw new InternalServerErrorException('Failed to fetch inventories');
   }
+}
 
   private getRandomInventories (posts: selectInventory[], count: number): selectInventory[] {
     const shuffled = posts.sort(() => 0.5 - Math.random());

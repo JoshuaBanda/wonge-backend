@@ -1,5 +1,5 @@
 {
-  "id": "0adc7e72-b82d-4de4-99ef-1bbe2d9943b8",
+  "id": "3fe04c8f-5173-4d0a-b239-ad3dc0763e1d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -312,6 +312,12 @@
         "whatsappmessage": {
           "name": "whatsappmessage",
           "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "quantity": {
+          "name": "quantity",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         }

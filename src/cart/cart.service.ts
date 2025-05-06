@@ -61,7 +61,7 @@ export class CartService {
           eq(cart.status,'active')
         )
       );
-    //console.log("res", res);
+    //console.log("res", res);  
     if(res==null){
       return
     }//console.log(res)
@@ -115,19 +115,61 @@ export class CartService {
     }
   }
   
-  findAll() {
-    return `This action returns all cart`;
+  async UpdateQuantity(newQuantity: number, inventory_id: number, cartId: number) {
+    try {
+      // Step 1: Get current inventory quantity
+      const inventoryResult = await db
+        .select({ quantity: inventory.quantity })
+        .from(inventory)
+        .where(eq(inventory.id, inventory_id));
+  
+      const availableInventoryQty = inventoryResult[0]?.quantity;
+  
+      if (availableInventoryQty == null) {
+        throw new Error("Inventory item not found.");
+      }
+  
+      // Step 2: Get current cart quantity
+      const cartResult = await db
+        .select({ quantity: cart.quantity })
+        .from(cart)
+        .where(eq(cart.id, cartId));
+  
+      const currentCartQty = cartResult[0]?.quantity;
+  
+      if (currentCartQty == null) {
+        throw new Error("Cart item not found.");
+      }
+  
+      // Step 3: Calculate the difference
+      const quantityDifference = newQuantity - currentCartQty;
+  
+      // Step 4: Calculate updated inventory
+      const updatedInventoryQty = availableInventoryQty - quantityDifference;
+  
+      if (updatedInventoryQty < 0) {
+        throw new Error("Not enough stock in inventory.");
+      }
+  
+      // Step 5: Update inventory
+      await db
+        .update(inventory)
+        .set({ quantity: updatedInventoryQty })
+        .where(eq(inventory.id, inventory_id));
+  
+      // Step 6: Update cart
+      const updatedCart = await db
+        .update(cart)
+        .set({ quantity: newQuantity })
+        .where(eq(cart.id, cartId))
+        .returning();
+  
+      return updatedCart;
+  
+    } catch (error) {
+      console.log("Error updating quantity:", error);
+      //throw new Error("Could not update quantity");
+    }
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
-  }
-
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
-  }
+  
 }

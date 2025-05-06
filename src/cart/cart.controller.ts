@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dto/create-cart.dto';
 import { UpdateCartDto } from './dto/update-cart.dto';
+import { UpdateQuantityCartDto } from './dto/update-quantity-cart.dto';
 
 @Controller('cart')
 export class CartController {
@@ -29,10 +30,6 @@ export class CartController {
   ){
     return this.cartService.checkCart(user_id,inventory_id)
   }
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartService.findOne(+id);
-  }
 
   @Patch('order')
   update(@Body() updateCartDto: UpdateCartDto) {
@@ -44,8 +41,14 @@ export class CartController {
   }
   
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartService.remove(+id);
+  //update quantity
+  @Patch('cart-quantity')
+  updateCartQuantity(
+    @Body() updateCartQuantity:UpdateQuantityCartDto
+  ){
+    console.log("to be updated",updateCartQuantity);
+    const {inventory_id,quantity,id}=updateCartQuantity;
+    
+    return this.cartService.UpdateQuantity(quantity,inventory_id,id)
   }
 }

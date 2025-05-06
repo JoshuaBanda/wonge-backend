@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS "inventory" (
 	"createdat" timestamp DEFAULT now(),
 	"type" text NOT NULL,
 	"price" text NOT NULL,
-	"whatsappmessage" text NOT NULL
+	"whatsappmessage" text NOT NULL,
+	"quantity" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "likes" (
