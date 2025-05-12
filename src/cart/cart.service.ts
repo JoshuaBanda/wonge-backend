@@ -21,7 +21,11 @@ export class CartService {
       .values(data)
       .returning();
   
-    //console.log(newCart);
+    console.log(newCart);
+    if(newCart){
+      await this.UpdateQuantity(newCart.quantity,newCart.inventory_id,newCart.id)
+      console.log("quantity updated");
+    }
     return newCart;
   }
   

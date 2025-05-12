@@ -13,8 +13,9 @@ export class InventoryController {
   //@UseGuards(JwtAuthGuard) // Apply the guard to protect this route@Get()
   
   //@UseGuards(JwtAuthGuard) // Apply the guard to protect this route
+
   @Get()
-async getAllInventories(/*@Req() req*/): Promise<selectInventory[]> {
+  async getAllInventories(/*@Req() req*/): Promise<selectInventory[]> {
 
   try {
     //let userId = req.user?.sub; // Access userId (stored in 'sub' in the token)
@@ -59,11 +60,17 @@ async getAllInventories(/*@Req() req*/): Promise<selectInventory[]> {
   ): Promise<selectInventory[]> {
     console.log(productType,page,limit);
     const userId=1;
-    const inventories = await this.inventoryService.getInventoryByType(productType,userId,page,limit);
-    if (!inventories) {
-      return []; // Return empty array if no inventories are found
-    }
+    let inventories = await this.inventoryService.getInventoryByType(productType,userId,page,limit);
 
+          // 3. If first attempt fails, try once more
+      if (!inventories) {
+          inventories = await this.inventoryService.getInventories(userId);
+      }
+
+      // 4. If still no inventories, return empty array
+      if (!inventories) {
+          return []; 
+      }
     // Use the limit from query
     const randomInventories = this.getRandomInventories(inventories, limit);
     return randomInventories;
