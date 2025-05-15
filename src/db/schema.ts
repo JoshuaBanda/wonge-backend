@@ -154,6 +154,7 @@ export const  cart=pgTable('cart',{
     quantity:integer('quantity').notNull(),
     //status of the items at a point in time
     status:text("status").notNull(),//active, removed ,outofStock,reservation expired
+    notification:boolean("notification").notNull().default(false),
 });
 
 export type selectCart=typeof cart.$inferSelect;

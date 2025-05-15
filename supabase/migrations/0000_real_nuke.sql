@@ -4,7 +4,8 @@ CREATE TABLE IF NOT EXISTS "cart" (
 	"user_id" integer NOT NULL,
 	"created_at" timestamp DEFAULT now(),
 	"quantity" integer NOT NULL,
-	"status" text NOT NULL
+	"status" text NOT NULL,
+	"notification" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "comments" (

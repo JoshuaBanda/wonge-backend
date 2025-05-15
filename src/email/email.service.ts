@@ -62,100 +62,24 @@ export class EmailService {
 
 
   
-  async sendEmailToSchool(message: { message: string }): Promise<void> {
-    // Function to introduce a delay,social
-    //skippin early child hood dev,gender
-    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const departments = [ /*'bsc-inf','bsc-bio', 'bed-com', 'bsc-com','bah-mfd','ba-eco'*/,'bsc-ele','bsc-mat','bsc','bsc-act-hon','bsc-che-hon','bsc-com-ne','bsc-phy','bsc-sta','bsc-geo','bsc-gly','bsc-fn','bsc-fc',/*social science*/'ba-soc','ba-dec','ba-psy','bah-seh','bsoc-sw','ba-com','bsoc-le','bsoc','bed-mat','bed-phy','bed-bio','bed-hec','bed-che','ess','el'];
-    let yearSuffix = 21; // Start with year '22'
-    const maxAttempts = 80;//max attempt to retry sending email
-    const retryLimit = 4;//maxmum retry before moving to the next unit
-    const timeoutLimit = 20000; // Increased timeout limit (20 seconds)
-    const maxRegNumber =80 ;//max reg numbers for a cohort
-    const emailDelay = 2000;  // Delay between emails (1 second)
   
-    let consecutiveFailures = 0;
   
-    for (let departmentIndex = 0; departmentIndex < departments.length; departmentIndex++) {
-      const department = departments[departmentIndex];
-  
-      for (let year = yearSuffix; year <= 24; year++) {
-        let regNumber = 1;
-        console.log(`Processing department: ${department}, Year: ${year}`);
-  
-        for (let i = 0; i < maxAttempts; i++) {
-          const regString = regNumber.toString().padStart(2, '0');
-          const email = `${department}-${regString}-${year}@unima.ac.mw`;
-  
-          console.log(`Sending email to: ${email}`);
-  
-          const mailOptions = {
-            from: process.env.SMTP_USER,
-            to: email,
-            subject: 'Unima Dating Hub',
-            text: message.message,
-          };
-  
-          const sendEmailWithTimeout = async (): Promise<void> => {
-            return new Promise((resolve, reject) => {
-              const timeout = setTimeout(() => {
-                reject(new Error("Email send timed out"));
-              }, timeoutLimit);
-  
-              this.transporter.sendMail(mailOptions, (error, info) => {
-                clearTimeout(timeout);
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve(info);
-                }
-              });
-            });
-          };
-  
-          try {
-            await sendEmailWithTimeout();
-            console.log(`Email sent to ${email}`);
-            consecutiveFailures = 0;
-          } catch (error) {
-            console.error(`Failed to send email to ${email}:`, error);
-            console.log(`Skipping email to ${email} due to failure.`);
-            consecutiveFailures++;
-  
-            // Check if consecutive failures exceed retryLimit and move to next year
-            if (consecutiveFailures >= retryLimit) {
-              console.log("3 consecutive failures occurred, moving to next year.");
-              break;
-            }
-  
-            // Check if the error is related to non-existent email (email address doesn't exist)
-            if (error.message.includes('User unknown') || error.message.includes('Recipient address rejected')) {
-              console.log(`Email address does not exist: ${email}`);
-            }
-  
-            regNumber++;
-            continue;
-          }
-  
-          regNumber++;
-  
-          if (regNumber > maxRegNumber) {
-            break;
-          }
-        }
-  
-        consecutiveFailures = 0;
-        await delay(emailDelay);  // Add delay between sending emails
-      }
-  
-      console.log(`Finished sending emails for department: ${department}`);
-    }
-  
-    console.log("All emails sent.");
-  }
-  
-    
+async notifyOrder(email: string, product: string, name: string, totalCost: number) {
+  try {
+    const mailOptions = {
+      from: process.env.SMTP_USER, // Your email address
+      to: email,
+      subject: 'Order Successful',
+      text: `Hello ${name},\n\nYou have ordered the following items:\n\n${product}\n\nTotal Cost: $${totalCost.toFixed(2)}\n\nThank you for your purchase!`,
+    };
 
-
-  
+    console.log(`Sending email to ${email} with total cost: $${totalCost}`);
+    await this.transporter.sendMail(mailOptions);
+    console.log('Email sent successfully.');
+  } catch (error) {
+    console.error('Error sending order confirmation email:', error);
+    throw new Error('Failed to send order email');
   }
+}
+
+}

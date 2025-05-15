@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { db } from 'src/db';  // Assuming 'db' is the instance of Drizzle ORM
-import { insertNotification, notification, selectNotification } from 'src/db/schema';
+import { cart, insertNotification, inventory, notification, selectNotification, usersTable } from 'src/db/schema';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class NotificationService {
+  constructor(
+      private emailService: EmailService){}
   // Fetch all notifications for a specific recipient
   async getNotificationsByRecipient(recipientId: number): Promise<selectNotification[]> {
     try {
@@ -76,6 +79,162 @@ async createNotificationsForFriends(friendsToRecieveNotifications: number[]) {
     console.error('Error creating notifications:', error);
   }
 }
+
+
+async notifyOrder(data: { user_id: number; inventory_ids: number[] }) {
+  const { user_id, inventory_ids } = data;
+  console.log(`Processing order for user: ${user_id}, inventory items: ${inventory_ids}`);
+
+  try {
+    // Step 1: Fetch user details (username and email)
+    const user = await this.getUserNameAndEmail(user_id);
+
+    // Step 2: Fetch product names, quantities, and costs
+ const products = await this.getInventoryData(inventory_ids);
+
+if (products && products.length > 0) {
+  const updatedCarts = await db
+    .update(cart)
+    .set({ notification: true })
+    .where(
+      and(
+        eq(cart.user_id, user_id),
+        inArray(cart.inventory_id, inventory_ids),
+        eq(cart.status, 'ordered') // ✅ Optional: ensure only ordered carts are updated
+      )
+    )
+    .returning();
+
+  console.log('Notification status updated for cart items:', updatedCarts.length);
+}
+
+    // Default fallback values for customer data
+    let customer_name: string = 'Unknown Customer';
+    let customer_email: string | null = null;
+
+    // Step 3: Extract user data if available
+    if (user) {
+      const { username, email } = user;
+      customer_name = username;
+      customer_email = email || null;
+    } else {
+      console.error(`User with ID ${user_id} not found.`);
+    }
+
+    // Step 4: Ensure products exist and have data
+    if (products && products.length > 0) {
+      // Step 5: Calculate total cost
+      const totalCost = products.reduce((sum, product) => {
+        return sum + product.quantity * product.cost; // Calculate total cost for each product
+      }, 0);
+
+      // Step 6: Format the product list as "Product Name (xQuantity)"
+      const productDescriptions = products
+        .map(p => `${p.name} (x${p.quantity})`)
+        .join(', ');
+
+      console.log(`User: ${customer_name}, Products: ${productDescriptions}, Total Cost: ${totalCost}`);
+
+      // Step 7: Ensure customer email is present, then send the email
+      if (customer_email) {
+        await this.emailService.notifyOrder(
+          customer_email,
+          productDescriptions,
+          customer_name,
+          totalCost // Send the total cost to email
+        );
+        //console.log('Order confirmation email sent successfully.');
+      } else {
+        console.error(`Email is missing for the customer (user: ${customer_name}).`);
+      }
+    } else {
+      console.error('No products found for the given cart IDs.');
+    }
+
+  } catch (error) {
+    console.error('Error notifying order:', error);
+  }
+}
+
+
+async getUserNameAndEmail(user_id: number): Promise<{ username: string; email: string|null } | null> {
+  try {
+    const result = await db
+      .select({
+        firstname: usersTable.firstname,
+        lastname: usersTable.lastname,
+        email: usersTable.email,
+      })
+      .from(usersTable)
+      .where(eq(usersTable.userid, user_id));
+
+    if (result.length > 0) {
+      const { firstname, lastname, email } = result[0];
+      const username = `${firstname} ${lastname}`;
+      return { username, email };
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching username and email:", error);
+    return null;
+  }
+}
+
+
+
+
+async getInventoryData(inventory_ids: number[]): Promise<{ name: string; quantity: number; cost: number }[]> {
+  try {
+    // Step 1: Get quantities from the cart
+    const quantitiesAndIds = await db
+      .select({
+        quantity: cart.quantity,
+        inventoryId: cart.inventory_id, // Ensure inventoryId is selected here
+      })
+      .from(cart)
+      .where(
+        and(
+          inArray(cart.inventory_id, inventory_ids),
+          eq(cart.notification,false)
+        )
+      );
+      
+
+
+  // Using inventory_ids
+      console.log(quantitiesAndIds,"kkkkkkkkkkkkkkkkkk");
+    // Step 2: Get inventory details with cost
+    const inventoryDetails = await db
+      .select({
+        id: inventory.id,
+        name: inventory.name,
+        cost: inventory.price, // cost could be string or number, handle appropriately
+      })
+      .from(inventory)
+      .where(inArray(inventory.id, inventory_ids));  // Ensure ids are passed correctly
+
+    // Step 3: Create a lookup map from inventory ID to details
+    const inventoryMap = new Map(inventoryDetails.map(item => [item.id, item]));
+
+    // Step 4: Combine quantity with item name and cost (ensuring cost is a number)
+    const result = quantitiesAndIds.map(item => {
+      const inventoryItem = inventoryMap.get(item.inventoryId);  // Reference the correct field
+      return {
+        name: inventoryItem?.name || 'Unknown Item',
+        quantity: item.quantity,
+        cost: Number(inventoryItem?.cost ?? 0),  // Ensure cost is a number
+      };
+    });
+
+    // Return an empty array instead of null
+    return result.length > 0 ? result : [];  // Return empty array instead of null
+  } catch (error) {
+    console.error("Error fetching inventory item names, quantities, and costs:", error);
+    return [];  // Return an empty array on error
+  }
+}
+
 
 
 }

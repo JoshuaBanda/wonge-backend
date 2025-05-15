@@ -1,5 +1,5 @@
 {
-  "id": "3fe04c8f-5173-4d0a-b239-ad3dc0763e1d",
+  "id": "9c9ac981-a61d-4228-bd46-ba8099dc1cdb",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -44,6 +44,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true
+        },
+        "notification": {
+          "name": "notification",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
         }
       },
       "indexes": {},

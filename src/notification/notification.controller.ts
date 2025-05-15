@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { insertNotification, selectNotification } from 'src/db/schema';
+import { CreateNotificationDto } from './dto/create-notification.dto';
 
 @Controller('notifications')
 export class NotificationController {
@@ -25,5 +26,13 @@ export class NotificationController {
     @Body('status') status: string,
   ): Promise<selectNotification> {
     return this.notificationService.updateNotificationStatus(id, status);
+  }
+
+  @Post('notify-customer')
+  async postEmailForOrderingProduct(@Body()createNotificationDto:CreateNotificationDto){
+    try{
+      const result= await this.notificationService.notifyOrder(createNotificationDto);
+    }
+    catch(error){console.error(error)}
   }
 }
