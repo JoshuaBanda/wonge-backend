@@ -1,5 +1,5 @@
 {
-  "id": "9c9ac981-a61d-4228-bd46-ba8099dc1cdb",
+  "id": "21a5025e-053b-4923-9aa8-d4a3fe750831",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -521,6 +521,48 @@
           "tableTo": "users",
           "columnsFrom": [
             "recipientId"
+          ],
+          "columnsTo": [
+            "userid"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "public.rolesTable": {
+      "name": "rolesTable",
+      "schema": "",
+      "columns": {
+        "role_id": {
+          "name": "role_id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "rolesTable_user_id_users_userid_fk": {
+          "name": "rolesTable_user_id_users_userid_fk",
+          "tableFrom": "rolesTable",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
           ],
           "columnsTo": [
             "userid"

@@ -157,5 +157,12 @@ export const  cart=pgTable('cart',{
     notification:boolean("notification").notNull().default(false),
 });
 
+
 export type selectCart=typeof cart.$inferSelect;
 export type insertCArt=typeof cart.$inferInsert;
+
+export const rolesTable=pgTable('rolesTable',{
+    role_id:serial('role_id').primaryKey(),
+    user_id:integer('user_id').notNull().references(()=>usersTable.userid,{onDelete:'cascade'}),
+    role:text('role').notNull(),
+})

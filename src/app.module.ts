@@ -11,9 +11,10 @@ import { UserAunthenticateModule } from './user-aunthenticate/user-aunthenticate
 import { PostLikesModule } from './post-likes/post-likes.module';
 import { CartModule } from './cart/cart.module';
 import { AwakeModule } from './awake/awake.module';
+import { RoleBasedAccessControlModule } from './role-based-access-control/role-based-access-control.module';
 
 @Module({
-  imports: [InventoryModule, NotificationModule, UsersModule, OtpModule, EmailModule, SearchModule, UserAunthenticateModule,PostLikesModule, CartModule, AwakeModule],
+  imports: [InventoryModule, NotificationModule, UsersModule, OtpModule, EmailModule, SearchModule, UserAunthenticateModule,PostLikesModule, CartModule, AwakeModule, RoleBasedAccessControlModule],
   controllers: [AppController],
   providers: [AppService],
 })

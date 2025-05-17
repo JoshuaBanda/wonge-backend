@@ -66,6 +66,12 @@ CREATE TABLE IF NOT EXISTS "notificatios" (
 	"created_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "rolesTable" (
+	"role_id" serial PRIMARY KEY NOT NULL,
+	"user_id" integer NOT NULL,
+	"role" text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
 	"userid" serial PRIMARY KEY NOT NULL,
 	"firstname" text NOT NULL,
@@ -155,6 +161,12 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "notificatios" ADD CONSTRAINT "notificatios_recipientId_users_userid_fk" FOREIGN KEY ("recipientId") REFERENCES "public"."users"("userid") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "rolesTable" ADD CONSTRAINT "rolesTable_user_id_users_userid_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("userid") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
