@@ -87,6 +87,7 @@ async notifyOrder(data: { user_id: number; inventory_ids: number[] }) {
 
   try {
     // Step 1: Fetch user details (username and email)
+    
     const user = await this.getUserNameAndEmail(user_id);
 
     // Step 2: Fetch product names, quantities, and costs
@@ -129,17 +130,22 @@ if (products && products.length > 0) {
       }, 0);
 
       // Step 6: Format the product list as "Product Name (xQuantity)"
-      const productDescriptions = products
-        .map(p => `${p.name} (x${p.quantity})`)
+      //19 may we have added photo to product description
+      /*const productDescriptions = products
+        .map(p => `{
+          description:${p.name} (x${p.quantity})
+          photo:${p.photo_url}
+          }`)
         .join(', ');
-
-      console.log(`User: ${customer_name}, Products: ${productDescriptions}, Total Cost: ${totalCost}`);
-
+*/
+      //console.log(`User: ${customer_name}, Products: ${productDescriptions}, Total Cost: ${totalCost}`);
+      
       // Step 7: Ensure customer email is present, then send the email
       if (customer_email) {
         await this.emailService.notifyOrder(
           customer_email,
-          productDescriptions,
+          //productDescriptions,
+          products,
           customer_name,
           totalCost // Send the total cost to email
         );
@@ -184,7 +190,7 @@ async getUserNameAndEmail(user_id: number): Promise<{ username: string; email: s
 
 
 
-async getInventoryData(inventory_ids: number[]): Promise<{ name: string; quantity: number; cost: number }[]> {
+async getInventoryData(inventory_ids: number[]): Promise<{ name: string; quantity: number; cost: number,photo_url:string }[]> {
   try {
     // Step 1: Get quantities from the cart
     const quantitiesAndIds = await db
@@ -205,16 +211,18 @@ async getInventoryData(inventory_ids: number[]): Promise<{ name: string; quantit
   // Using inventory_ids
       console.log(quantitiesAndIds,"kkkkkkkkkkkkkkkkkk");
     // Step 2: Get inventory details with cost
+        //19 may include picture url
     const inventoryDetails = await db
       .select({
         id: inventory.id,
         name: inventory.name,
-        cost: inventory.price, // cost could be string or number, handle appropriately
+        cost: inventory.price, 
+        photo_url:inventory.photo_url,
       })
       .from(inventory)
-      .where(inArray(inventory.id, inventory_ids));  // Ensure ids are passed correctly
-
+      .where(inArray(inventory.id, inventory_ids));  
     // Step 3: Create a lookup map from inventory ID to details
+
     const inventoryMap = new Map(inventoryDetails.map(item => [item.id, item]));
 
     // Step 4: Combine quantity with item name and cost (ensuring cost is a number)
@@ -224,6 +232,7 @@ async getInventoryData(inventory_ids: number[]): Promise<{ name: string; quantit
         name: inventoryItem?.name || 'Unknown Item',
         quantity: item.quantity,
         cost: Number(inventoryItem?.cost ?? 0),  // Ensure cost is a number
+        photo_url:inventoryItem?.photo_url ??'',
       };
     });
 

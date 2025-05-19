@@ -64,14 +64,58 @@ export class EmailService {
   
   
   
-async notifyOrder(email: string, product: string, name: string, totalCost: number) {
+async notifyOrder(email: string, products: { name: string; quantity: number; photo_url: string }[], name: string, totalCost: number) {
+  
   try {
-    const mailOptions = {
-      from: process.env.SMTP_USER, // Your email address
-      to: email,
-      subject: 'Order Successful',
-      text: `Hello ${name},\n\nYou have ordered the following items:\n\n${product}\n\nTotal Cost: $${totalCost.toFixed(2)}\n\nThank you for your purchase!`,
-    };
+    const productLines = products.map(p => 
+  `- ${p.name} (x${p.quantity})\n  Photo: ${p.photo_url}`
+).join('\n\n');
+  const mailOptions = {
+  from: process.env.SMTP_USER,
+  to: email,
+  subject: 'Order Successful',
+  html: `
+    <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
+      <h2 style="color: #4CAF50;">Hello ${name},</h2>
+      <p>Thank you for your order. Here are the details:</p>
+
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Item</th>
+            <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Quantity</th>
+            <th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Image</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${products.map(p => `
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${p.name}</td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">${p.quantity}</td>
+              <td style="padding: 8px; border-bottom: 1px solid #ddd;">
+                <img src="${p.photo_url}" alt="${p.name}" style="width: 80px; height: auto; border: 1px solid #ccc; border-radius: 5px; background-color:rgba(230, 58, 101, 0.9);" />
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+
+      <p style="margin-top: 20px; font-weight: bold;">Total Cost: $${totalCost.toFixed(2)}</p>
+
+      <p style="margin-top: 30px;">We appreciate your business!</p>
+
+      <p>
+        Visit our website: 
+        <a href="https://wonge-market-online.netlify.app/home" style="color:rgb(253, 0, 63); text-decoration: none;font-family: 'Brush Script MT', cursive; font-size: 18px">
+          Wonge Market Online
+        </a>
+      </p>
+
+      
+    </div>
+  `
+};
+
 
     console.log(`Sending email to ${email} with total cost: $${totalCost}`);
     await this.transporter.sendMail(mailOptions);
