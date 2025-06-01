@@ -12,7 +12,7 @@ export class AwakeService {
   @Interval(300000) 
   async callAnotherBackend() {
     try {
-      const response$ = this.httpService.get('https://datehubbackend-055i.onrender.com/awake');
+      const response$ = this.httpService.get('https://datehubbackend.onrender.com/awake');
       const response = await lastValueFrom(response$);
       this.logger.log('Data received:', response.data);
       console.log('request sent');
