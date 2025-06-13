@@ -28,7 +28,7 @@ export class EmailService {
     const mailOptions = {
       from: process.env.SMTP_USER, // Your email address
       to: email,
-      subject: 'Wonge Market Online OTP Email Verification',
+      subject: 'Wezzie Market Online OTP Email Verification',
       text: `Your OTP is: ${otp}. This OTP is valid for 10 minutes. `,
     };
 
@@ -106,8 +106,8 @@ async notifyOrder(email: string, products: { name: string; quantity: number; pho
 
       <p>
         Visit our website: 
-        <a href="https://wonge-market-online.netlify.app/home" style="color:rgb(253, 0, 63); text-decoration: none;font-family: 'Brush Script MT', cursive; font-size: 18px">
-          Wonge Market Online
+        <a href="https://Wezzie-market-online.netlify.app/home" style="color:rgb(255, 210, 128); text-decoration: none;font-family: 'Brush Script MT', cursive; font-size: 18px">
+          Wezzie Market Online
         </a>
       </p>
 
